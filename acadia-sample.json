@@ -1,0 +1,25 @@
+{
+  "id":"demo-acadia","name":"Acadia climbing trip — example","startDate":"2026-07-19","endDate":"2026-07-24","locked":false,
+  "people":[{"id":"rohit","name":"Rohit"},{"id":"ben","name":"Ben"},{"id":"ted","name":"Ted"},{"id":"nupur","name":"Nupur"},{"id":"talia","name":"Talia"},{"id":"mike","name":"Mike"},{"id":"elise","name":"Elise"},{"id":"karolina","name":"Karolina"},{"id":"joachim","name":"Joachim"},{"id":"diana","name":"Diana"},{"id":"katia","name":"Katia"}],
+  "categories":[
+    {"id":"shared-dinner","name":"Shared Dinner","excludedIds":[],"useAttendance":false},
+    {"id":"limited-dinner","name":"Limited Dinner","excludedIds":["katia"],"useAttendance":false},
+    {"id":"general-shared","name":"General Shared","excludedIds":["katia"],"useAttendance":false},
+    {"id":"shared-alcohol","name":"Shared Alcohol","excludedIds":["mike","elise","katia"],"useAttendance":false}
+  ],
+  "expenses":[
+    {"id":"e1","purchaseDate":"2026-07-15","title":"Burgers & Pasta with Meat sauce","categoryId":"shared-dinner","payerId":"ben","amountCents":6500,"participantIds":null},
+    {"id":"e2","purchaseDate":"2026-07-18","title":"Taco","categoryId":"shared-dinner","payerId":"elise","amountCents":9000,"participantIds":null},
+    {"id":"e3","purchaseDate":"2026-07-20","title":"Firewood","categoryId":"general-shared","payerId":"karolina","amountCents":2000,"participantIds":null},
+    {"id":"e4","purchaseDate":"2026-07-22","title":"Pizza + meat for tacos","categoryId":"shared-dinner","payerId":"elise","amountCents":9100,"participantIds":null},
+    {"id":"e5","purchaseDate":"2026-07-24","title":"Firewood, small groceries, ice","categoryId":"general-shared","payerId":"talia","amountCents":1400,"participantIds":null},
+    {"id":"e6","purchaseDate":"2026-07-23","title":"Firewood","categoryId":"general-shared","payerId":"ted","amountCents":2000,"participantIds":null},
+    {"id":"e7","purchaseDate":"","title":"Grocery and stuff","categoryId":"general-shared","payerId":"mike","amountCents":4000,"participantIds":null},
+    {"id":"e8","purchaseDate":"2026-07-13","title":"Chicken & Marinades","categoryId":"shared-dinner","payerId":"ted","amountCents":4000,"participantIds":null},
+    {"id":"e9","purchaseDate":"2026-07-18","title":"Chicken Biryani","categoryId":"limited-dinner","payerId":"nupur","amountCents":3000,"participantIds":null},
+    {"id":"e10","purchaseDate":"2026-07-18","title":"Veg for Pasta","categoryId":"shared-dinner","payerId":"nupur","amountCents":1000,"participantIds":null},
+    {"id":"e11","purchaseDate":"2026-07-13","title":"High Noon / Ciders","categoryId":"shared-alcohol","payerId":"ted","amountCents":2000,"participantIds":null},
+    {"id":"e12","purchaseDate":"2026-07-22","title":"Ciders","categoryId":"shared-alcohol","payerId":"ted","amountCents":3675,"participantIds":null},
+    {"id":"e13","purchaseDate":"2026-07-20","title":"Groceries","categoryId":"shared-dinner","payerId":"rohit","amountCents":6900,"participantIds":null,"notes":"Four different grocery runs"}
+  ],"paidTransfers":[],"revision":0
+}
