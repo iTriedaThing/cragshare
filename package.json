@@ -1,1 +1,10 @@
-{"name":"cragshare","version":"0.1.2","type":"module","private":true,"scripts":{"test":"node --test *.test.mjs","serve":"python3 -m http.server 8080"}}
+{
+  "name": "cragshare",
+  "version": "1.0.1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test *.test.mjs",
+    "serve": "python3 -m http.server 8080"
+  }
+}

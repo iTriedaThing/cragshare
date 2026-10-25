@@ -1,82 +1,84 @@
-# Cragshare v0.1.2 — group climbing trip expense sharing
+# Cragshare v1.0.1 — Split the trip, not the friendship
 
-Mobile-friendly vanilla JavaScript application. No build step, no npm install. GitHub Pages-compatible.
+An account-free, mobile-friendly expense-sharing app for group climbing trips. The frontend runs as plain JavaScript on GitHub Pages; optional Supabase storage provides private-link access and shared, live trip updates.
 
-## What's implemented
+**This release is a drop-in frontend/engine update for v0.1.2.** It does not require a database migration, re-created trip, changed invitation link, or changes to the saved trip JSON structure.
 
-- Create trips; change dates and names.
-- Add and remove participants (a participant listed as a payer must have their expenses reassigned or deleted first); edit categories and category-specific exclusions.
-- Optional trip days and categories that use them. **All trip days (automatic)** means a missing `days` value. These people count only for days between the trip start and end, never arbitrary dates. **No trip days selected** (`days: []`) excludes them from costs for particular days; it does not exclude them from costs with no day chosen. Named date selections count only on the chosen trip dates. The attendance editor has **Use all trip days (automatic)**.
-- **Day this was for (optional)** is deliberately different from **Date bought**. When entered, it must fall within the trip's date range. The date picker restricts choices, the save action checks the date, and the calculation engine independently refuses invalid dates (including those imported from older JSON backups). This check applies to manual expense splits too.
-- When a category uses trip days and a cost has no day chosen, the app warns that it will be shared by everyone included in the category, regardless of attendance. It still permits saving after confirmation; expenses with manual sharing selections are already explicit.
-- Out-of-trip day errors block balance and payment displays rather than silently billing people or showing incomplete calculations. Fix the date on the flagged expense. Changing trip dates is blocked if that would push any existing expense's day outside the trip.
-- Add, edit, delete and categorize expenses; override participants individually on any expense.
-- Integer-cent per-expense allocations; deterministic allocation of leftover pennies in participant order.
-- Per-person total paid, assigned share, per-category share and net balance.
-- Pairwise reimbursements (expense-grounded) and compact settlement (balance-grounded).
-- Payment-completed checkboxes, trip lock, CSV export and JSON export/import.
-- Browser-local demo immediately; optional Supabase for share-by-link and live sync.
-- Acadia reference dataset from the supplied workbook (`acadia-sample.json`).
+## What's new
 
-## Updating an existing v0.1 or v0.1.1 installation
+1. **Delete unused categories.** Each category has a **Remove** button. If any expense uses that category, removal is blocked until those expenses are reassigned or deleted. No expenses are deleted implicitly. If the category is unused, its removal does not alter balances or clear payment checkmarks. Default categories may be deleted too.
+2. **Visible version number.** `v1.0.1` appears beside **Shared live** (or **Local demo**) in the header. The footer also shows the version. Versioned JavaScript and CSS asset URLs help avoid stale browser caches after deployment.
+3. **Trip days editor beside each person.** Click **Trip days** on a participant's row to open a small anchored panel. On mobile it appears as a bottom sheet. Choose days, **Save days**, **Use all trip days**, or **Cancel**. Escape or the close button dismisses the editor without saving.
+4. **Readability pass.** Application views, UI controls, calculation logic, storage and styles have clearer sections and comments. Source is now organized for a human maintainer, without bundlers or a framework.
 
-Before replacing files, **Export JSON** from the existing app as a backup. Extract this package over the existing app folder, replacing the original files, and reload with Ctrl+Shift+R. The browser storage key and JSON format are unchanged. If hosting on GitHub Pages, publish the updated files to the same repository and URL. Do not delete browser storage or change the site origin if you want to keep existing local data.
+No financial allocation or settlement formulas have changed.
 
-## Run locally
+## Update an existing GitHub Pages deployment
 
-From this directory run `python3 -m http.server 8080` and open http://localhost:8080. Do not open `index.html` as a `file://` URL (browser modules need HTTP). This starts a LOCAL DEMO: edits are only in your browser. It is **not shared** until configured below.
+**Your live friends' trips are stored in Supabase, not the code repository.** Even so, export a JSON backup of your trip before deploying changes.
 
-Run tests: `npm test` (Node 20+). No npm dependencies. Tests include the out-of-trip-day bug reported against the October 16–20 sample trip.
+From your existing local repository (for example, `E:\Projects\cragshare`):
 
-## Enable shared trip links
+1. Unzip this release and copy its files into the repository folder, replacing files with matching names.
+2. **Do not replace or delete `config.mjs`.** It contains the working Supabase URL and publishable key. `config.mjs` is deliberately not included in this update package.
+3. The release also deliberately does not include `supabase.sql` or `acadia-sample.json`; keep the versions already in your repository.
+4. Test locally using `py -m http.server 8080` and `http://localhost:8080/`. Open **Categories & people**, try an unused category, and check the trip-days editor. If the port is in use, use the running local server instead of starting another.
+5. Review and publish:
 
-1. Create a Supabase project: https://supabase.com/dashboard . Enable **Authentication → Providers → Anonymous Sign-ins**.
-2. Open SQL Editor and run `supabase.sql`. It creates tables, member-access policies and three RPC functions.
-3. Open `config.mjs` and paste your **Project URL** and **publishable/anon key**. Never expose the `service_role` key. Keys used by browsers are visible; SQL policies enforce access.
-4. Serve the app via HTTP or GitHub Pages. It anonymously signs a visitor in when first opened.
-5. Open the app and press **Create shared trip**. It creates a database copy of the current trip and gives a link containing `#trip=...&invite=...`. Anyone with that link can join and edit.
-6. Share the link. Changes are saved remotely with optimistic version checks; all connected visitors receive updates via Supabase Realtime (if enabled by the SQL script).
+   ```powershell
+   git status
+   git add app.mjs engine.mjs engine.test.mjs storage.mjs styles.css index.html package.json README.md
+   git commit -m "Release v1.0.1: category removal, trip day popover, code cleanup"
+   git push
+   ```
 
-**Security boundary:** possession of the invitation link is enough to join; the link is a secret. Invite is held in the URL fragment rather than query parameters to reduce incidental transmission. Members currently have equal edit powers (the `locked` flag is an interface safeguard, not a server-enforced organizer permission). There's no identity verification, audit ledger, server-side arithmetic validation, or granular permissions yet. Use among trusted friends only. Revocation UI isn't implemented in v0.1. Clear the fragment before sharing screenshots. An anonymous session can be lost when browser storage is cleared.
+GitHub Pages redeploys from `main`. Friends can keep using their existing invitation links. They need to refresh or reopen the app to load the updated release. A previously open browser tab may keep running the older version until refreshed.
 
-**Conflict behavior:** if two people edit simultaneously, one save will fail rather than silently overwrite another. Reload, inspect the latest data and repeat the edit. This is not an offline-capable merge system.
+## Run / test
 
-## Publish to GitHub Pages
+- Python local server: `py -m http.server 8080` (on Windows), then open `http://localhost:8080`.
+- Financial regression tests: `npm test` (Node.js 20+; no npm install required).
+- Check syntax: `node --check app.mjs`, `node --check engine.mjs`, and `node --check storage.mjs`.
+- No executable or build step is required; `index.html` imports ES modules directly.
 
-Create a repository, upload all project files (including the SQL and README as optional source documentation), then go to **Settings → Pages → Deploy from a branch → main → / (root)**. The live URL should be `https://YOURNAME.github.io/YOURREPO/`.
+## Source map for maintainers
 
-Because all links and asset URLs are relative, it supports a Pages repository subpath. Supabase uses HTTPS and the browser URL's fragment for trip invitations; no redirect/callback setup is needed for anonymous sign-ins.
+| File | Responsibility | Edit when... |
+| --- | --- | --- |
+| `app.mjs` | UI, rendering, form input and event handlers | Changing visible controls, labels, form flows or dialogs |
+| `engine.mjs` | Pure trip-day eligibility, cent allocation, balances, settlement methods | Changing who owes what or adding validation rules |
+| `storage.mjs` | Browser-local and Supabase storage, shared-trip subscriptions | Changing synchronization or persistence |
+| `styles.css` | Visual design, responsiveness, attendance popover layout | Changing appearance or mobile behavior |
+| `index.html` | App entry point, versioned asset references | Bumping versions or changing HTML head metadata |
+| `engine.test.mjs` | Tests for money rules, exclusions, attendance and safe removals | Changing the calculation engine or its invariants |
+| `package.json` | App version and scripts | Releasing new versions |
+| `config.mjs` | Existing deployment's Supabase URL and public publishable key | Initial setup only; preserve during this upgrade |
+| `supabase.sql` | Database tables, policies and shared-trip RPCs | A separately reviewed backend update; **not** modified here |
 
-## Known limitations and next steps
+### Data model and rules worth knowing
 
-- This is a **working first prototype**, not a production-hardened financial service. Live Supabase sync and security have not been end-to-end tested against a real provisioned project.
-- `create shared trip` makes a new shared copy of the current local trip. Existing local copies are not automatically migrated again.
-- `New trip` leaves the current shared trip and starts a local draft; use `Create shared trip` on the draft to publish it.
-- Participant removal is available, with payer-protection and settlement recalculation. Category deletion and approval workflows are not yet implemented. As before, trusted collaborators can edit trip data.
-- The compact settlement is a deterministic greedy/cumulative-equivalent scheme with at most payers + recipients − 1 payments. It is **not guaranteed** to attain the mathematically absolute minimum transfer count.
-- Payment checkboxes identify individual *proposed* transfers; editing expenses may invalidate completed markings. No money is transferred by this app.
-- No automated deployment or rollback, receipt upload, robust audit history, or proper server-side settlement snapshots yet.
-- Existing spreadsheet's itineraries, hiking suggestions and Airbnb planning are deliberately out of scope.
-- Prior workbook contains formula caches with `#NAME?`; the source records and rules are imported and recomputed independently instead.
+- `trip.people` is a list of `{ id, name, days? }`. An **absent** `days` property means **all trip days**, `days: []` means **no days**, and a nonempty array lists selected days. `tripDaysPopover()` in `app.mjs` edits this without changing its meaning.
+- A category may exclude people (`excludedIds`) and optionally use the trip day of each expense (`useAttendance`). Each expense can override the category rules via `participantIds`.
+- The stored JSON key is `benefitDate` for compatibility; the user-facing label is **Day this was for**. It must be within trip dates if filled.
+- `amountCents` and per-person shares are integer cents. `compute()` distributes remainder pennies deterministically and checks settlement reconciliation. Never compute financial values using floating-point dollars.
+- **Paid by** is separate from **who shares**. Someone can be reimbursed for a purchase they were excluded from consuming.
+- `removeCategory()` refuses any category referenced by an expense. Unlike participant removal, safe unused-category removal doesn't need to rewrite other trip records.
+- `mutate()` enforces the trip lock, increments the revision, and saves the trip. The UI is rerendered after persistence. Do not mutate the shared trip outside that flow without understanding the effect on synchronization.
+- `paidTransfers` reflects checked-off proposed payments, not actual transfers of money.
 
-## Data model
+## Regression checks for v1.0.1
 
-A Trip JSON document holds `people`, `categories`, `expenses`, `paidTransfers`, dates, and lock state. Each expense has `amountCents`, `payerId`, `categoryId`, optional `benefitDate`, and optional `participantIds`. `null` participant IDs means category defaults plus opt-in attendance; an explicit array overrides them. The calculation engine is pure (`engine.mjs`) and independent from storage and UI. Attendance semantics are shared by the expense UI and calculation engine. Removing a participant clears their category exclusions and custom expense inclusions, resets paid flags and recomputes remaining shares. Always export a backup before significant edits. Existing v0.1 JSON backups remain compatible.
+- An unused category can be deleted and previously checked payments remain checked.
+- Removing a category attached to one or more expenses is refused.
+- The anchored trip-days editor opens beside the selected person, and closing it without saving leaves the trip data unchanged.
+- Saving a subset of trip days persists the correct array; **Use all trip days** removes the array property to restore the default.
+- Original Acadia expenses still sum to **$545.75** in the supplied sample, and all financial allocations and settlements balance to zero.
+- Expense editing, the balance view, and both settlement display modes still work.
 
-## What's new in v0.1.2
+## Security and known limitations
 
-- Replaced confusing “benefit date” and “attendance default” wording with **Day this was for**, **Trip days**, **All trip days (automatic)**, and **No trip days selected**.
-- Out-of-trip days cannot be selected or saved, and older imported expenses with outside dates display a clear fix-needed warning until corrected.
-- Costs without a selected day show a warning when the category uses trip days.
-- Existing JSON structure, browser-local storage key, and Supabase setup stay unchanged.
-
-## Quick checks for this release
-
-1. Export your trip as JSON before updating. Replace the old app files with this release, then refresh with Ctrl+Shift+R on the same local URL. Existing local trip data is compatible.
-2. Import `cragshare-trip-test-2.json` if you want to reproduce the reported edge case. The cost **no folks** (Oct 23) should show **Fix date**, because the trip is Oct 16–20. Balances and payments remain unavailable until corrected.
-3. Edit **no folks** and choose Oct 20 for **Day this was for**. The error should disappear and the full $239.87 should be allocated. Eight people should share **no folks**; the app does not change the real saved export automatically.
-4. **Turkey meat sauce** has no day chosen while **Shared Dinner** uses trip days, so it should show a caution; it is still valid and allocated among category members.
-5. In **Categories & people**, the **Trip days** control shows **All trip days (automatic)** when no days were explicitly selected, and **No trip days selected** if every box is unchecked and saved.
-6. Try to choose a day outside the trip for a new expense; the date picker restricts the range and saving checks again. Shortening the trip dates is blocked if doing so would leave an existing cost’s selected day outside the trip.
-
-The underlying JSON key remains `benefitDate` for compatibility, although the UI calls it **Day this was for**.
+- Shared-trip links act as invitation credentials. Share only with trusted friends; members currently have equal editing rights.
+- Supabase stores the shared trip, and the published JavaScript is public. Use only the *publishable* key in `config.mjs`, **never** a secret or service-role key.
+- The frontend lock is not a database-level organizer permission. Full role management, edit history and payment approval are future improvements.
+- Changes from multiple editors use version checks; a conflicting save can fail rather than silently overwrite remote changes. Reload the latest trip before retrying.
+- The compact settlement reduces payment count but is not guaranteed to find the global mathematical minimum in every possible case.
